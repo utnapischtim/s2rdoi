@@ -94,9 +94,8 @@ def create_doi(
 ) -> str:
     """Create DOI."""
     record = DataCiteMetadata(publisher)
-
     visitor = BITSToDataCite()
-    visitor.visit(metadata, record)
+    visitor.convert(metadata, record)
 
     client = DataCiteRESTClient(
         credentials.username,

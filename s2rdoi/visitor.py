@@ -76,6 +76,7 @@ class Visitor:
 
     def convert(self, node: Element, record: DataCiteMetadata) -> None:
         """Convert."""
+        self.process(node, record)
         self.visit(node, record)
 
 
@@ -87,9 +88,12 @@ class BITSToDataCite(Visitor):
         # Temporary state used while collecting a single contrib element
         self._current_contrib: dict[str, str] = {}
         self._current_contrib_type: str = ""
-        self._url = {}
 
-    def book_part_wrapper(self, element: Element, record: DataCiteMetadata) -> None:
+    def visit_book_part_wrapper(
+        self,
+        element: Element,
+        record: DataCiteMetadata,
+    ) -> None:
         """Extract resource type."""
         match element.attrib["content-type"]:
             case "research-article":
@@ -101,10 +105,12 @@ class BITSToDataCite(Visitor):
             case "demonstration":
                 record.resource_type_general = "Other"
 
-        self.visit(element, record)
-
     def visit_book_part_meta(self, element: Element, record: DataCiteMetadata) -> None:
         """Descends into book-part-meta to reach title-group and contrib-group."""
+        self.visit(element, record)
+
+    def visit_book_part(self, element: Element, record: DataCiteMetadata) -> None:
+        """Visit book part."""
         self.visit(element, record)
 
     def visit_title_group(self, element: Element, record: DataCiteMetadata) -> None:
