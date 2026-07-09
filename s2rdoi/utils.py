@@ -7,6 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from functools import wraps
 from os import environ
+from typing import Concatenate
 from xml.etree.ElementTree import Element
 
 from click import option
@@ -25,7 +26,9 @@ class DataCiteCredentials:
     test: bool
 
 
-def build_credentials(func: Callable) -> Callable:
+def build_credentials[**P, R](
+    func: Callable[Concatenate[DataCiteCredentials, P], R],
+) -> Callable[P, R]:
     """Decorate that adds DataCite credential options to a Click command.
 
     It adds the options to the decorated function and injects a
@@ -44,20 +47,20 @@ def build_credentials(func: Callable) -> Callable:
     )
     @wraps(func)
     def wrapper(
-        *args: tuple,
+        *args: P.args,
         username: str,
         password: str,
         prefix: str,
         test: bool,
-        **kwargs: dict,
-    ) -> Callable:
+        **kwargs: P.kwargs,
+    ) -> R:
         credentials = DataCiteCredentials(
             username=username,
             password=password,
             prefix=prefix,
             test=test,
         )
-        return func(*args, credentials=credentials, **kwargs)
+        return func(credentials=credentials, *args, **kwargs)
 
     return wrapper
 

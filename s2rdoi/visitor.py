@@ -62,7 +62,7 @@ class Visitor:
     def process(self, node: Element, record: DataCiteMetadata) -> None:
         """Execute the corresponding method to the tag name."""
 
-        def silently_ignore(*_: dict, **__: dict) -> None:
+        def silently_ignore(_: Element, __: DataCiteMetadata) -> None:
             """Silently ignore element."""
 
         tag_name = QName(node).localname.replace("-", "_")
