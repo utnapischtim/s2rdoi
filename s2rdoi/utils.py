@@ -110,8 +110,11 @@ def create_doi(
     # set the url to the doi with the base as the url base
     url = url_base + doi
 
+    client.update_url(doi, url)
+
     # set the doi public with the given url
-    return client.public_doi(record.dump(), url)
+    client.show_doi(doi)
+    return doi
 
 
 def insert_doi(metadata: Element, doi: str) -> Element:
