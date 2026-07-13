@@ -10,7 +10,7 @@ from xml.etree.ElementTree import Element, ElementTree
 from click import Path as ClickPath
 from click import group, option, secho
 
-from .parse_xml import parse_xml
+from .parse_xml import parse_xml, write_xml
 from .utils import (
     DataCiteCredentials,
     build_credentials,
@@ -61,7 +61,7 @@ def public_doi(
     credentials: DataCiteCredentials,
 ) -> None:
     """Register a public DOI for the given XML file and write the updated XML."""
-    tree = parse_xml(input_xml)
+    tree, doctype = parse_xml(input_xml)
     root = cast(Element, tree.getroot())
 
     doi = create_doi(root, publisher, url_base, credentials)
@@ -70,7 +70,7 @@ def public_doi(
     update_parent(parent_xml, old_doi, doi)
 
     et = ElementTree(root)
-    et.write(output_xml, encoding="utf-8")
+    write_xml(et, output_xml, doctype)
 
     _, _, doi_suffix = doi.partition("/")
     rename_xml_and_parent_dir(output_xml, doi_suffix)

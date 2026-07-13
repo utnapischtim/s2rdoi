@@ -14,7 +14,7 @@ from xml.etree.ElementTree import Element, ElementTree
 from click import option
 from datacite import DataCiteRESTClient
 
-from .parse_xml import parse_xml
+from .parse_xml import parse_xml, write_xml
 from .visitor import BITSToDataCite, DataCiteMetadata
 
 
@@ -142,14 +142,14 @@ def insert_doi(metadata: Element, doi: str) -> tuple[Element, str]:
 
 def update_parent(parent: Path, old_doi: str, doi: str) -> None:
     """Update parent."""
-    tree = parse_xml(parent)
+    tree, doctype = parse_xml(parent)
     root = cast(Element, tree.getroot())
 
     existing = cast(Element, root.find(f".//ext-link[.='{old_doi}']"))
     existing.text = doi
 
     et = ElementTree(root)
-    et.write(parent, encoding="utf-8")
+    write_xml(et, parent, doctype)
 
 
 def rename_xml_and_parent_dir(filepath: Path, replacement: str) -> Path:
