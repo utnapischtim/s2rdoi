@@ -89,7 +89,7 @@ def get_credentials() -> DataCiteCredentials:
 
 
 def create_doi(
-    metadata: Element,
+    metadata: Element | None,
     publisher: str,
     url_base: str,
     credentials: DataCiteCredentials,
