@@ -7,12 +7,14 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from functools import wraps
 from os import environ
-from typing import Concatenate
-from xml.etree.ElementTree import Element
+from pathlib import Path
+from typing import Concatenate, cast
+from xml.etree.ElementTree import Element, ElementTree
 
 from click import option
 from datacite import DataCiteRESTClient
 
+from .parse_xml import parse_xml
 from .visitor import BITSToDataCite, DataCiteMetadata
 
 
@@ -117,12 +119,13 @@ def create_doi(
     return doi
 
 
-def insert_doi(metadata: Element, doi: str) -> Element:
+def insert_doi(metadata: Element, doi: str) -> tuple[Element, str]:
     """Insert the DOI."""
     existing = metadata.find(".//book-part-id[@book-part-id-type='doi']")
     if existing is not None:
+        old_doi = cast(str, existing.text)
         existing.text = doi
-        return metadata
+        return metadata, old_doi
 
     # Prefer inserting inside <book-part-meta>
     parent = metadata.find(".//book-part-meta")
@@ -134,4 +137,16 @@ def insert_doi(metadata: Element, doi: str) -> Element:
     doi_element.text = doi
     parent.append(doi_element)
 
-    return metadata
+    return metadata, ""
+
+
+def update_parent(parent: Path, old_doi: str, doi: str) -> None:
+    """Update parent."""
+    tree = parse_xml(parent)
+    root = cast(Element, tree.getroot())
+
+    existing = cast(Element, root.find(f".//ext-link[.='{old_doi}']"))
+    existing.text = doi
+
+    et = ElementTree(root)
+    et.write(parent, encoding="utf-8")

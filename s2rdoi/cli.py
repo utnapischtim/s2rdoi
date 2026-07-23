@@ -4,13 +4,20 @@
 """CLI."""
 
 from pathlib import Path
-from xml.etree.ElementTree import ElementTree
+from typing import cast
+from xml.etree.ElementTree import Element, ElementTree
 
 from click import Path as ClickPath
 from click import group, option, secho
 
 from .parse_xml import parse_xml
-from .utils import DataCiteCredentials, build_credentials, create_doi, insert_doi
+from .utils import (
+    DataCiteCredentials,
+    build_credentials,
+    create_doi,
+    insert_doi,
+    update_parent,
+)
 
 
 @group()
@@ -31,6 +38,12 @@ def main() -> None:
     type=ClickPath(writable=True, path_type=Path),
     help="Path where the updated XML (with DOI injected) will be written.",
 )
+@option(
+    "--parent-xml",
+    required=True,
+    type=ClickPath(writable=True, path_type=Path),
+    help="Path where the updated XML (with DOI injected) will be written.",
+)
 @option("--publisher", required=True, help="Publisher name for the DataCite record.")
 @option(
     "--url-base",
@@ -41,16 +54,19 @@ def main() -> None:
 def public_doi(
     input_xml: Path,
     output_xml: Path,
+    parent_xml: Path,
     publisher: str,
     url_base: str,
     credentials: DataCiteCredentials,
 ) -> None:
     """Register a public DOI for the given XML file and write the updated XML."""
     tree = parse_xml(input_xml)
-    root = tree.getroot()
+    root = cast(Element, tree.getroot())
 
     doi = create_doi(root, publisher, url_base, credentials)
-    root = insert_doi(root, doi)
+    root, old_doi = insert_doi(root, doi)
+
+    update_parent(parent_xml, old_doi, doi)
 
     et = ElementTree(root)
     et.write(output_xml, encoding="utf-8")  # , pretty_print=True # lxml
