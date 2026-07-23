@@ -16,6 +16,7 @@ from .utils import (
     build_credentials,
     create_doi,
     insert_doi,
+    rename_xml_and_parent_dir,
     update_parent,
 )
 
@@ -70,6 +71,9 @@ def public_doi(
 
     et = ElementTree(root)
     et.write(output_xml, encoding="utf-8")  # , pretty_print=True # lxml
+
+    _, _, doi_suffix = doi.partition("/")
+    rename_xml_and_parent_dir(output_xml, doi_suffix)
 
     secho(f"Draft DOI registered: {doi}", fg="green")
     secho(f"Updated XML written to: {output_xml}", fg="green")

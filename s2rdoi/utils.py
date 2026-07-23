@@ -150,3 +150,26 @@ def update_parent(parent: Path, old_doi: str, doi: str) -> None:
 
     et = ElementTree(root)
     et.write(parent, encoding="utf-8")
+
+
+def rename_xml_and_parent_dir(filepath: Path, replacement: str) -> Path:
+    """Rename the parent directory and the XML file on disk."""
+    old_dir = filepath.parent
+    new_dir = old_dir.parent / replacement
+
+    if new_dir.exists():
+        msg = f"Target directory already exists: {new_dir}"
+        raise FileExistsError(msg)
+
+    old_dir.rename(new_dir)
+
+    moved_file = new_dir / filepath.name
+    new_file = new_dir / f"{replacement}{filepath.suffix}"
+
+    if new_file.exists():
+        msg = f"Target file already exists: {new_file}"
+        raise FileExistsError(msg)
+
+    moved_file.rename(new_file)
+
+    return new_file
