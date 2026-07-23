@@ -70,7 +70,7 @@ def public_doi(
     update_parent(parent_xml, old_doi, doi)
 
     et = ElementTree(root)
-    et.write(output_xml, encoding="utf-8")  # , pretty_print=True # lxml
+    et.write(output_xml, encoding="utf-8")
 
     _, _, doi_suffix = doi.partition("/")
     rename_xml_and_parent_dir(output_xml, doi_suffix)
