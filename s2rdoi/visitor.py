@@ -104,6 +104,8 @@ class BITSToDataCite(Visitor):
                 record.resource_type_general = "Text"
             case "demonstration":
                 record.resource_type_general = "Other"
+            case "short-paper":
+                record.resource_type_general = "Other"
 
     def visit_book_part_meta(self, element: Element, record: DataCiteMetadata) -> None:
         """Descends into book-part-meta to reach title-group and contrib-group."""
